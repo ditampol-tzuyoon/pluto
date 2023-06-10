@@ -1,23 +1,5 @@
+-- USED
 bot = Plutonium:GetBot()
-
-function warp(delay,world,iddoor)
-    while bot.World.Name:lower() ~= world:lower() do
-        if iddoor == nil or iddoor == "" then
-            bot:Warp(world)
-            Plutonium:Sleep(delay)
-        else
-            bot:Warp(world.."|"..iddoor)
-            Plutonium:Sleep(delay)
-        end
-    end
-    if bot.World.Name:lower() == world:lower() and iddoor ~= nil and iddoor and iddoor ~= "" then
-        while bot:GetTile(math.floor(bot.NetAvatar.Pos.X/32), math.floor(bot.NetAvatar.Pos.Y/32)).Foreground == 6 do
-            bot:Warp(world.."|"..iddoor)
-            Plutonium:Sleep(delay)
-        end
-    end
-end
-
 function getBot()
     if bot.m_bot.State == "Connected" then
         Status = "online"
@@ -40,12 +22,6 @@ function getBot()
     }
 end
 
-function place(id,p_x,p_y)
-    local x = math.floor(bot.NetAvatar.Pos.X/32) + p_x
-    local y = math.floor(bot.NetAvatar.Pos.Y/32) + p_y
-    bot:PlaceTile(x, y, id)
-end
-
 function findItem(id)
     if id == 112 then
         return bot.NetAvatar.Inventory.Gems
@@ -58,8 +34,8 @@ function findItem(id)
     end
 end
 
-function say(ohdear)
-    bot:Say(ohdear)
+function say(od)
+    bot:SendPacket(2, 'action|input\n|text|'..od)
 end
 
 function findPath(x,y)
@@ -85,22 +61,32 @@ function place(id,p_x,p_y)
     bot:PlaceTile(x, y, id)
 end
 
-function sleep(milliseconds)
-    Plutonium:Sleep(milliseconds)
+function sleep(ms)
+    Plutonium:Sleep(ms)
 end
 
 function drop(iditem,count)
     if count ~= nil then
         bot:Drop(iditem, count)
-        sleep(2000)
     else
         bot:Drop(iditem)
-        sleep(2000)
     end
 end
 
-function collect(range)
-    bot:Collect(range*32)
+function trash(iditem, count)
+    if count ~= nil then
+        bot:Trash(iditem, count)
+    else
+        bot:Trash(iditem)
+    end
+end
+
+function collect(range, id)
+    if id == nil then
+        bot:Collect(range*32)
+    else
+        bot:Collect(range*32, id)
+    end
 end
 
 function connect()
@@ -139,32 +125,24 @@ function getTiles()
     return tiles
 end
 
-function warp(delay,world,iddoor)
-    while bot.World.Name:lower() ~= world:lower() do
-        if iddoor == nil then
-            bot:Warp(world)
-            Plutonium:Sleep(delay)
-        else
-            bot:Warp(world.."|"..iddoor)
-            Plutonium:Sleep(delay)
-            while bot:GetTile(math.floor(bot.NetAvatar.Pos.X/32), math.floor(bot.NetAvatar.Pos.Y/32)).Foreground == 6 do
-                bot:Warp(world.."|"..iddoor)
-                Plutonium:Sleep(delay)
-            end
-        end
+function warp(Dunia, Kunci)
+    if Kunci then
+        bot:Warp(Dunia.."|"..Kunci)
+    else
+        bot:Warp(Dunia)
     end
 end
 
-function store_pack(namepack)
-    Plutonium:Sleep(100)
-    Plutonium:SendPacket(2,"action|buy\nitem|"..namepack)
-    Plutonium:Sleep(400)
+function sendPacket(type, text)
+    Plutonium:SendPacket(type, text)
 end
 
-function upbagpack()
-    Plutonium:Sleep(100)
+function store_pack(namepack)
+    Plutonium:SendPacket(2,"action|buy\nitem|"..namepack)
+end
+
+function UpSlot()
     Plutonium:SendPacket(2,"action|buy\nitem|upgrade_backpack")
-    Plutonium:Sleep(400)
 end
 
 -- EXAMPLE
